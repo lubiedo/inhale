@@ -255,9 +255,9 @@ def parseFile(inputfile):
     bf.close()
     return finfo
   except Exception as e:
-    print(e)
+    # print(e)
     print("Error processing file!")
-    return
+    return None
 
 ### Main logic #################################################################
 if __name__ == '__main__':
@@ -310,6 +310,8 @@ if __name__ == '__main__':
         ansiout += "{}{} + Analyzing {}{}{}\n".format(side,e,cCYAN,infile,e)
         try:
             inn = parseFile(infile)
+            if not inn:
+                sys.exit(1)
             ansiout += outputs.printAnsi(inn) # Make an option 
             ansiout += endline
             print(ansiout)

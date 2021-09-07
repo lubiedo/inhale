@@ -4,3 +4,7 @@ r2pipe
 yara-python
 pefile
 ansi2html
+pyyaml
+requests
+telfhash
+binwalk
