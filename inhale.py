@@ -271,6 +271,9 @@ def parseFile(inputfile):
 
 ### Main logic #################################################################
 if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
 
     args       = parser.parse_args()
     infile     = args.infile
@@ -281,6 +284,7 @@ if __name__ == '__main__':
     bwSigz     = args.binWalkSigs
     VTInfo     = args.virusTotalInfo
     urlList    = args.urlList
+    htmlOut    = (args.htmlout or CONFIG['web']['gen_html'])
 
     ###- Command Line Switches -###
     if args.yaraRules:
@@ -326,7 +330,7 @@ if __name__ == '__main__':
             ansiout += outputs.printAnsi(inn) # Make an option 
             ansiout += endline
             print(ansiout)
-            if args.htmlout:
+            if htmlOut:
                 outpath = outputs.generateHTML(ansiout,CONFIG["web"]["in_path"],CONFIG["web"]["fqdn"])
                 print("HTML output is here! {}".format(outpath))
         except BrokenPipeError:
@@ -357,7 +361,7 @@ if __name__ == '__main__':
                     continue
             ansiout += endline
             print(ansiout)
-            if args.htmlout:
+            if htmlOut:
                 outpath = outputs.generateHTML(ansiout,CONFIG["web"]["in_path"],CONFIG["web"]["fqdn"])
                 print("HTML output is here! {}".format(outpath))
         else:
@@ -381,7 +385,7 @@ if __name__ == '__main__':
         ansiout += outputs.printAnsi(inn) # Make an option 
         ansiout += endline
         print(ansiout)
-        if args.htmlout:
+        if htmlOut:
             outpath = outputs.generateHTML(ansiout,CONFIG["web"]["in_path"],CONFIG["web"]["fqdn"])
             print("HTML output is here! {}".format(outpath))
         if add2db:
@@ -412,7 +416,7 @@ if __name__ == '__main__':
                     continue
         ansiout += endline
         print(ansiout)
-        if args.htmlout:
+        if htmlOut:
             outpath = outputs.generateHTML(ansiout,CONFIG["web"]["in_path"],CONFIG["web"]["fqdn"])
             print("HTML output is here! {}".format(outpath))
 
@@ -434,7 +438,7 @@ if __name__ == '__main__':
                     continue
             ansiout += endline
             print(ansiout)
-            if args.htmlout:
+            if htmlOut:
                 outpath = outputs.generateHTML(ansiout,CONFIG["web"]["in_path"],CONFIG["web"]["fqdn"])
                 print("HTML output is here! {}".format(outpath))
         else:
