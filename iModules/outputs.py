@@ -24,7 +24,7 @@ def printAnsi(finfo):
     output += "{}     SHA1 │ {}{}\n".format(side,e,finfo["sha1"])
     output += "{}   SHA256 │ {}{}\n".format(side,e,finfo["sha256"])
     output += "{}──────────┼{}{}\n".format(side,"─"*68,e)
-    if "headers" in finfo:
+    if "headers" in finfo and len(finfo['headers']) > 0:
         output += "{} {}HEADERS  {}│{}\n".format(side,cYEL,cCYAN,e)
         output += "{}──────────╯{}\n".format(side,e)
         for h in finfo["headers"]:

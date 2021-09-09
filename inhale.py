@@ -43,6 +43,9 @@ parser.add_argument('--html', dest='htmlout', help="Save output as html to the w
 
 ts    = time.gmtime()
 today = time.strftime("%Y-%m-%d", ts)
+VT    = None
+if CONFIG['api_keys']['vt'] != '':
+    VT = VirusTotal(CONFIG['api_keys']['vt'])
 
 # Text decorations
 startline = cPNK+"╭"+"─"*79+e
@@ -243,12 +246,8 @@ def parseFile(inputfile):
             finfo["telfhash"] = th
 
     ### VirusTotal ###
-    if VTInfo:
-        if CONFIG['api_keys']['vt'] == '':
-            print('VirusTotal API key was not configured!')
-        else:
-            vtapi = VirusTotal(CONFIG['api_keys']['vt'])
-            finfo['vt'] = vtapi.getFileInfo(finfo['sha256'])
+    if VTInfo and VT:
+        finfo['vt'] = VT.getFileInfo(finfo['sha256'])
 
     if BaazarInfo:
         baazar = MalwareBaazar(finfo['sha256'])
@@ -363,7 +362,24 @@ if __name__ == '__main__':
 
     ###-- Processing single file from url --------------------------------------
     elif urlFile:
-        singleFile, fHeaders, fOutput = rDownload.getSingleFile(urlFile,fpath)
+        singleFile = ''
+        fHeaders = {}
+        fOutput = ''
+
+        if urlFile.startswith('vt://'):
+            if not VT:
+                print('Error: VirusTotal not configured!')
+                exit(1)
+            urlHash = os.path.basename(urlFile)
+            singleFile = VT.sampleDownload(urlHash, fpath)
+            if not singleFile:
+                print(ansiout.strip())
+                print("{}{}{} [!] VirusTotal sample not found!{}".format(side,e,cRED,e))
+                print(endline)
+                exit()
+        else:
+            singleFile, fHeaders, fOutput = rDownload.getSingleFile(urlFile,fpath)
+
         if singleFile == 0:
             ansiout += fOutput
             print(ansiout)
@@ -387,13 +403,32 @@ if __name__ == '__main__':
 
     ###-- Processing a list of urls with files ---------------------------------
     elif urlList:
-        ansiout += "{}{} + Analyzing all files in {}{}{}".format(side,e,cCYAN,urlList,e)
+        ansiout += "{}{} + Analyzing all files in {}{}{}\n".format(side,e,cCYAN,urlList,e)
         with open(urlList,"r") as f:
             lines = f.readlines()
             for l in lines:
                 try:
+                    if len(l) == 0:
+                        continue
+
                     l = l.split("\n")[0]
-                    singleFile, fHeaders, fOutput = rDownload.getSingleFile(l,fpath)
+                    singleFile = ''
+                    fHeaders = {}
+                    fOutput = ''
+
+                    if l.startswith('vt://'):
+                        if not VT:
+                            print('Error: VirusTotal not configured!')
+                            continue
+                        urlHash = os.path.basename(l)
+                        singleFile = VT.sampleDownload(urlHash, fpath)
+                        if not singleFile:
+                            ansiout += divline+'\n'
+                            ansiout += "{}{}{} [!] VirusTotal sample not found! ({}) {}\n".format(side,e,cRED,urlHash,e)
+                            continue
+                    else:
+                        singleFile, fHeaders, fOutput = rDownload.getSingleFile(l, fpath)
+
                     ansiout += fOutput
                     headersList = []
                     for key, value in fHeaders.items(): # maybe abstract this to a utils.py

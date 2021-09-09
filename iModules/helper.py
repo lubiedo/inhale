@@ -24,6 +24,12 @@ e     = "\033[0m"
 # Global 
 CONFIG   = loadYML('config.yml')
 
+def makeSimpleRequest(url, headers = {}):
+    proxies = {}
+    if CONFIG['options']['use_proxy']:
+        proxies = CONFIG['proxies']
+    return requests.get(url, headers=headers, proxies=proxies)
+
 def makeAPIRequest(url, method = 'GET', headers = {}, data = {}):
     if not 'Accept' in headers:
         headers['Accept'] = 'application/json'
