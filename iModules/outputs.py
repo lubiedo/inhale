@@ -1,20 +1,9 @@
+from iModules.helper import *
+
 import datetime, re, yaml
 from ansi2html import Ansi2HTMLConverter
 
 ### This is where all of the outputs will go
-
-# ANSI Colors
-cBLK  = "\033[1;30m"
-cRED  = "\033[38;5;197m"
-cGRN  = "\033[1;32m"
-cYEL  = "\033[1;33m"
-cBLUE = "\033[1;34m"
-cMGNT = "\033[1;35m"
-cCYAN = "\033[1;36m"
-cWHT  = "\033[1;37m"
-cPNK  = "\033[38;5;219m"
-cPURP = "\033[38;5;141m"
-e     = "\033[0m"
 
 # Text decorations
 startline = cPNK+"╭"+"─"*79+e
