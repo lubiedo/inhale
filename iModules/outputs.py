@@ -1,4 +1,4 @@
-import datetime
+import datetime, re, yaml
 from ansi2html import Ansi2HTMLConverter
 
 ### This is where all of the outputs will go
@@ -26,6 +26,7 @@ def printAnsi(finfo):
     # Create the ansi output
     output = ""
     output += divline+'\n'
+    output += "{}──────────╮{}\n".format(side,e)
     output += "{} Filename │ {}{}\n".format(side,e,finfo["filename"])
     output += "{}  FileExt │ {}{}\n".format(side,e,finfo["file_ext"])
     output += "{} Filesize │ {}{}\n".format(side,e,finfo["filesize"])
@@ -87,7 +88,23 @@ def printAnsi(finfo):
             output += "{}{} FOUND \033[31m{}{} URLS\033[0m\n".format(side,cYEL,len(urls),cYEL)
             for url in urls:
                 output += "{} - {}{}\n".format(side,e,url)
+
+    if finfo['vt'] != None:
+        output += "{}{} VIRUSTOTAL {}\n".format(side,cYEL,e)
+        if len(finfo['vt']) > 0 and 'data' in finfo['vt']:
+            output += prettyJSON(finfo['vt']['data']['attributes'])
+        else:
+            output += "{}{}  NOT FOUND {}\n".format(side, cRED, e)
+
     return output
+
+def prettyJSON(data):
+    resub = lambda r,s,t: re.sub(r, s, t, 0, re.MULTILINE)
+
+    yamled = yaml.safe_dump(data)
+    yamled = resub(r'^(\s*(?:- )*)(.+?):([\s\n])', '\\1{}\\2{}\\3'.format(cPURP, e), yamled)
+    yamled = resub(r'(?!\x33)^(\s*)-', '\\1{}-{}'.format(cYEL, e), yamled)
+    return resub(r'^', f'{side}  ', yamled) + '\n'
 
 # ANSI2HTML for webserver outuput
 def generateHTML(inhaleOut,webdirpath,fqdn):
@@ -100,3 +117,4 @@ def generateHTML(inhaleOut,webdirpath,fqdn):
        outfile.write(html)
     webPath = fqdn+webdirpath+timeStamp+".html"
     return webPath
+

@@ -17,6 +17,7 @@ import time
 
 import iModules
 from iModules import *
+from iModules.virustotal import VirusTotal
 
 CONFIG = helper.CONFIG # This imports our config file for use
 
@@ -30,6 +31,7 @@ parser.add_argument('-r', dest='rDirectory', help='Analyze a remote directory (u
 parser.add_argument('-l', dest='urlList', help='Analyze a list of URLs in a text file')
 parser.add_argument('-t', dest='tags', help='Add additional tags to the output.')
 parser.add_argument('-b', dest='binWalkSigs', help="Turn off binwalk signatures", action="store_true")
+parser.add_argument('-V', dest='virusTotalInfo', help="Turn off VirusTotal file info", action="store_false")
 parser.add_argument('-y', dest='yaraRules', action='store', help="Specify custom Yara Rules")
 parser.add_argument('-o', dest='outdir', action='store',
                     help="Store scraped files in specific output dir (default: ./files/<date>/)")
@@ -252,10 +254,18 @@ def parseFile(inputfile):
         if len(th) > 1:
             finfo["telfhash"] = th
 
+    ### VirusTotal ###
+    if VTInfo and CONFIG['api_keys']['vt'] != '':
+        vtapi = VirusTotal(CONFIG['api_keys']['vt'])
+        finfo['vt'] = vtapi.getFileInfo(finfo['sha256'])
+    else:
+        finfo['vt'] = None
+
+
     bf.close()
     return finfo
   except Exception as e:
-    # print(e)
+    print(e)
     print("Error processing file!")
     return None
 
@@ -269,6 +279,7 @@ if __name__ == '__main__':
     urlFile    = args.urlFile
     tags       = args.tags
     bwSigz     = args.binWalkSigs
+    VTInfo     = args.virusTotalInfo
     urlList    = args.urlList
 
     ###- Command Line Switches -###
