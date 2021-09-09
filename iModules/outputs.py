@@ -88,8 +88,16 @@ def printAnsi(finfo):
             output += "{}{} FOUND \033[31m{}{} URLS\033[0m\n".format(side,cYEL,len(urls),cYEL)
             for url in urls:
                 output += "{} - {}{}\n".format(side,e,url)
+    # malware baazar
+    if 'baazar' in finfo:
+        output += "{}{} MALWARE BAAZAR {}\n".format(side,cYEL,e)
+        if finfo['baazar'] != None:
+            output += prettyJSON(finfo['baazar'])
+        else:
+            output += "{}{}  NOT FOUND {}\n".format(side, cRED, e)
 
-    if finfo['vt'] != None:
+    # virustotal
+    if 'vt' in finfo:
         output += "{}{} VIRUSTOTAL {}\n".format(side,cYEL,e)
         if len(finfo['vt']) > 0 and 'data' in finfo['vt']:
             output += prettyJSON(finfo['vt']['data']['attributes'])
@@ -104,7 +112,7 @@ def prettyJSON(data):
     yamled = yaml.safe_dump(data)
     yamled = resub(r'^(\s*(?:- )*)(.+?):([\s\n])', '\\1{}\\2{}\\3'.format(cPURP, e), yamled)
     yamled = resub(r'(?!\x33)^(\s*)-', '\\1{}-{}'.format(cYEL, e), yamled)
-    return resub(r'^', f'{side}  ', yamled) + '\n'
+    return resub(r'^(?!$)', f'{side}  ', yamled)
 
 # ANSI2HTML for webserver outuput
 def generateHTML(inhaleOut,webdirpath,fqdn):

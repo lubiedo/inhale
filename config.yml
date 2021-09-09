@@ -16,6 +16,8 @@ analyst_opts:
   grab_syms: False      # Document all symbols from a file
   unpack_packers: False # Unpack packed files and reanalyze 
   unzip_archives: False # Unzip archives and reanalyze
+  baazar_info:  True    # Retrieve Malware Baazar information
+  vt_info:  False       # Retrieve VirusTotal information
 
 web:
   gen_html: False

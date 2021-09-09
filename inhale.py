@@ -18,6 +18,7 @@ import time
 import iModules
 from iModules import *
 from iModules.virustotal import VirusTotal
+from iModules.baazar import MalwareBaazar
 
 CONFIG = helper.CONFIG # This imports our config file for use
 
@@ -32,6 +33,7 @@ parser.add_argument('-l', dest='urlList', help='Analyze a list of URLs in a text
 parser.add_argument('-t', dest='tags', help='Add additional tags to the output.')
 parser.add_argument('-b', dest='binWalkSigs', help="Turn off binwalk signatures", action="store_true")
 parser.add_argument('-V', dest='virusTotalInfo', help="Turn off VirusTotal file info", action="store_false")
+parser.add_argument('-B', dest='malwareBaazarInfo', help="Turn off Malware Baazar file info", action="store_false")
 parser.add_argument('-y', dest='yaraRules', action='store', help="Specify custom Yara Rules")
 parser.add_argument('-o', dest='outdir', action='store',
                     help="Store scraped files in specific output dir (default: ./files/<date>/)")
@@ -255,12 +257,16 @@ def parseFile(inputfile):
             finfo["telfhash"] = th
 
     ### VirusTotal ###
-    if VTInfo and CONFIG['api_keys']['vt'] != '':
-        vtapi = VirusTotal(CONFIG['api_keys']['vt'])
-        finfo['vt'] = vtapi.getFileInfo(finfo['sha256'])
-    else:
-        finfo['vt'] = None
+    if VTInfo:
+        if CONFIG['api_keys']['vt'] == '':
+            print('VirusTotal API key was not configured!')
+        else:
+            vtapi = VirusTotal(CONFIG['api_keys']['vt'])
+            finfo['vt'] = vtapi.getFileInfo(finfo['sha256'])
 
+    if BaazarInfo:
+        baazar = MalwareBaazar(finfo['sha256'])
+        finfo['baazar'] = baazar.getIntel()
 
     bf.close()
     return finfo
@@ -282,7 +288,8 @@ if __name__ == '__main__':
     urlFile    = args.urlFile
     tags       = args.tags
     bwSigz     = args.binWalkSigs
-    VTInfo     = args.virusTotalInfo
+    VTInfo     = (args.virusTotalInfo and CONFIG['analyst_opts']['vt_info'])
+    BaazarInfo = (args.malwareBaazarInfo and CONFIG['analyst_opts']['baazar_info'])
     urlList    = args.urlList
     htmlOut    = (args.htmlout or CONFIG['web']['gen_html'])
 
